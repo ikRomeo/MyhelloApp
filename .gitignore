@@ -1,0 +1,176 @@
+## Visual Studio specific files
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+x64/
+Debug/
+Release/
+build/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio Code settings
+.vscode/
+
+# Compiled object files
+*.obj
+*.o
+*.so
+*.dll
+*.exe
+*.pdb
+
+# Precompiled Headers
+*.pch
+*.ipch
+
+# Libraries
+*.lib
+*.a
+
+# Logs and databases
+*.log
+*.tlog/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Others
+*.DS_Store
+Thumbs.db
+
+# Vulkan or shader related (if you have shaders)
+*.spv
+
+# Ignore todo or notes files only if you want to
+# todolist.txt# Visual Studio specific files
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+x64/
+Debug/
+Release/
+build/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio Code settings
+.vscode/
+
+# Compiled object files
+*.obj
+*.o
+*.so
+*.dll
+*.exe
+*.pdb
+
+# Precompiled Headers
+*.pch
+*.ipch
+
+# Libraries
+*.lib
+*.a
+
+# Logs and databases
+*.log
+*.tlog/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Others
+*.DS_Store
+Thumbs.db
+
+# Vulkan or shader related (if you have shaders)
+*.spv
+
+# Ignore todo or notes files only if you want to
+# todolist.txt Visual Studio specific files
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+x64/
+Debug/
+Release/
+build/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio Code settings
+.vscode/
+
+# Compiled object files
+*.obj
+*.o
+*.so
+*.dll
+*.exe
+*.pdb
+
+# Precompiled Headers
+*.pch
+*.ipch
+
+# Libraries
+*.lib
+*.a
+
+# Logs and databases
+*.log
+*.tlog/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Others
+*.DS_Store
+Thumbs.db
+
+# Vulkan or shader related (if you have shaders)
+*.spv
+
+# Ignore todo or notes files only if you want to
+# todolist.txt
+
+# Ignore Vulkan SDK or external libraries folders
+MyhelloApp/ExternalLibraries/vulkan/
+MyhelloApp/ExternalLibraries/glm/
+
+# Ignore build output directories (adjust to your setup)
+x64/
+myToDoLIstVulkan/build/
+
+# Ignore common Visual Studio files (optional but recommended)
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vcxproj.user
+*.opensdf
+*.vcxproj.filters
+*.pdb
+
