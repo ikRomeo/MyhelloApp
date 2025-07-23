@@ -542,24 +542,43 @@ namespace ikE {
 		throw std::runtime_error("failed to find supported format");
 	}
    
-	// a helper function for selecting a suitable memory type on the GPU based on what kind of memory Vulkan resource(buffer/image) needs
-	// when we allocate memories in vulkan we need to specify the memory type index
-	// notice the findMemoryType fuction Type is unint32_t which needs to be defined before usage
-	// i.e typedef unsigned int unint32_t unlike its counter part uint32 that don't need to be defined
-	// findMemorytype has two arguments a uint32_t variable which serves as the type index and VkMemoryPropertyFlags which is an enum
-	// and it is used to represent a combination of memory property flags type using bitwise or it is exposed by the vulkan pysical device(GPU)
-	// inside the function we encounter VkPysicalDeviceMemoryProperties struct that has two array members and two variable
-	// that serves as indexis and describes how much memory the physical device has, how it is structured and what
-	// each memory type supports
-	// the purpose of this findMemoryType function is when you allocate memory in Vulkan using vkAllocateMemory, you need to 
-	// specify a memory index that needs to match two things
-	// 1. be allowed by the resource memoryTypeBits, a uint32_t variable member of memoryRequirements struct
-	// 2. support the properties you want (i.e VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT_DEVICE_LOCAL_BIT,e.t.c) a member of VkMemoryPropertyFlags
-	// Then returns index into VkPhysicalDeviceMemoryProperties.memoryTypes[]
-	// The vkGetPhysicalDeviceMemoryProperties gets the memory types and their properties for current GPU
-	// The for loop iterate through all memory types supported by the GPU
-	// Then the if statement which has two steps a bitshift and equals to condition
-	// 1. checks if type i is allowed by the resource by shifting and bitmasking it  by 1 with the help of & operator to test
+	/* a helper function for selecting a suitable memory type on the GPU based on what kind of memory Vulkan resource(buffer / image) needs
+	 the purpose of this findMemoryType function is when you allocate memory in Vulkan using vkAllocateMemory, you need to 
+	 specify a memory index that needs to match two things
+	 1. be allowed by the resource memoryTypeBits, a uint32_t variable member of memoryRequirements struct
+	 2. support the properties you want (i.e VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT_DEVICE_LOCAL_BIT,e.t.c) a member of VkMemoryPropertyFlags
+	 Then returns index into VkPhysicalDeviceMemoryProperties.memoryTypes[]
+	
+	 notice the findMemoryType fuction Type is unint32_t which needs to be defined before usage
+	 i.e (typedef unsigned int unint32_t) unlike its counter part uint32 that don't need to be defined
+	 findMemorytype has two arguments a uint32_t variable typeFilter which serves as the bitmask type that tells you which
+	 memory types are acceptable for your allocation (i.e for buffer or image) it comes from Vulkan functions like
+	 vkGetBufferMemoryRequirements(...,&memRequirements); and typeFilter serves as uint32_t memoryTypeBits of VkMemoryRequriement struct
+	 and VkMemoryPropertyFlags which is an enum, it is a bitmask of VkMemoryPropertyFlagBits
+	 tells vulkan the desired propeperties of the memory you are looking for or properties of memory a particular heap has
+	 in simple terms it describes how you use a memory block(GPU-only,CPU-accessible,cached, coherent,e.t.c)
+	
+	 inside the function we encounter VkPysicalDeviceMemoryProperties struct that has two array members and two variable
+	 that serves as indexis and describes how much memory the physical device has, how it is structured and what
+	 each memory type supports. it is instanciated with memProperties
+
+	 The vkGetPhysicalDeviceMemoryProperties gets the memory types and their properties for current GPU and takes the 
+	 physical Device and address of memPropeties as arguments
+	 The for loop iterate through all memory types supported by the GPU
+	 Then the if statement which has two steps a bit operation and equals to condition
+	 1. checks if type i is allowed by the resource by shifting it by 1 which is (1 << i) 
+	 then we use the & operator to check weather a specific bit(i) is set in typefilter 
+	 notice the left shift (<<) operator shifts the bits position  within a larger integer or binary space
+	 && operator which is a normal conditional operator states here that 
+	 what ever typefilter is and what memPropeties.memoryType at index i is 
+	 notice that memoryTypes which is an array is an instance of memoryType which is a member of the struct VkPhysicalDeviceMemoryProperties
+	 memoryType is also a struct that has a member VkMemoryPropertyFlags which is an enum that is instanced to propertyFlags
+	 inside memoryType struct. also VkMemoryPropertyFlags is also part of findMemoryType argument
+	 with that said in simple laymans term typefilter is an index and properties is holding the bit flags we are trying to access
+	 the & operator is used to isolate only the bits that are set in both and == operator means "do all the requested bits exist"
+	 if it works it return i and leave the inner-loop and return control flow to the outer-loop to until condition is met
+	 if it fails it exit and throws error */
+
 	uint32_t IkeDeviceEngine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -571,55 +590,146 @@ namespace ikE {
 
 		throw std::runtime_error("failed to find suitable memory type !");
 	}
+/*creatBuffer() function is responsibe for creating Buffer and allocating memory for it
+  it is a function with five arguments as its Parameters
+  inside the function we call and instance the 
+  1. VkBufferCreateInfo that instance two arguments from createBuffer which is size and usage
+  we start the VkCreateInfo struct then assign it's members that we need 
+  sType a VkStructure Type that is a struct,
+  size is VkDeviceSize that is a uint32_t ,
+  usage a uint32_t via (typedef VkFlags VkBufferUsageFlags;) and 
+  SharingMode which means that we are using only a queue family in this case graphics 
+  that is why we using VK_SHARING_MODE_EXCLUSIVE which is assigned 0 in vkSharingMode enum
+  2. we then call vkCreateBuffer() function with an if condition and pass in device_ which is a VKDevice handle,
+  a reference to the &bufferInfo, nullptr which is a const vkAllocationCallbacks pointer that is a member
+  of vkAllocateMemory() function of type VkResult the reason for this is we are not doing any fancy memory
+  allocation and Note that instead of using malloc,realloc or free vulkan uses vkAllocateMemory function for that
+  then we compare it to Vk_SUCCESS if it returns not succesful it throws a runtime error if not we proceed to 
+  3. The VkMemoryRequirements that we instance with memRequirements which serves for vulkan to determine how much
+  memory we need to allocate for a resource (i.e buffer or image) and what kind of memory we can use
+  4. we then use vkGetMemoryRequiremtents() to query the memory requirement for a given vulkan buffer object
+  this function tells us how much memory we need to allocate and the constraints for that memory to be compatible
+  with the buffers. its arguments are the device_ which is the vulkan logical device that owns the buffer
+  the buffer an instance of vkBuffer a vulkan object, whose memory requirements we want,and a reference to 
+  the VkMemoryRequirements via memRequirements because inside the vkGetBufferMemoryRequirements() function 
+  vkMemoryRequirements originally a struct is instanced as a pointer member of VkMemoryRequirements()
+  the reason why we are referencing it
+  5. we then instance a VkMemoryAllocateInfo struct with allocInfo that is used to specify parameters for
+  allocating device memory in vulkan. the idea is that we fill out the struct and pass it to vkAllocateMemory()function
+  the VkMemoryAllocateInfo members are the sType which is needed to identify vulkan structures
+  the Allocation size which we assign the VkMemoryRequirement member size to, via memRequirement.size
+  the memoryTypeIndex a uint32_t type which is used to specify which type of memory to allocate,
+  chosen based on required memory properties you will notice that we assigned findMemoryType() to it
+  you will notice that its argument this time is VkMemoryRequirements.memoryTypebits member which is a uint32_t type
+  and VkMemoryPropertyFlags struct which we instanced as properties
+  6.Then we use an if statement to call vkAllocateMemory() and its parameters are the vulkan device_,
+   a reference to the AllocateInfo struct, a null pointer that serves as the VkAllocationCallbacks pointer
+   and a reference to the VkDeviceMemory handle via bufferMemory we then check if it is not successfull
+   throw an error else we bind it to vkBindBufferMemory() which takes the VkDevice handle device_,the VkBuffer and
+   zero which is an offset into the memory block it is commonly 0 unless we are using sub-allocation
+   the function serves as a way to bind a block of device memory which is previously allocacted to 
+   a Vulkan buffer object
 
+*/
 
 	void IkeDeviceEngine::createBuffer(
-		VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory) {
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		VkDeviceSize size,                   //the size in bytes of the buffer to create
+		VkBufferUsageFlags usage,            // how the buffer will be used e.g vertx buffer, uniform buffer
+		VkMemoryPropertyFlags properties,    // Specifies memory requirements e.g devic-local,host-visible
+		VkBuffer& buffer,                    // Output parameter, the created vulkan handle
+		VkDeviceMemory& bufferMemory) {      // Output parameter, the allocated device memory backing the buffer
+
+		VkBufferCreateInfo bufferInfo{};                            // an initialized struct
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;    // Required for Vulkan structures to identify themself
+		bufferInfo.size = size;                                     // Sets the buffer size (how much memory it will hold)
+		bufferInfo.usage = usage;                                   // tells vulkan what the buffer is used for e.g VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;         // means only one queue family e.g graphics will use this buffer at a time
 
 		if (vkCreateBuffer(device_, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create vertex buffer!");
+			throw std::runtime_error("failed to create vertex buffer!");  // if the vkCreateBuffer fails it throws a runtime error
 		}
+
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device_, buffer, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+		allocInfo.allocationSize = memRequirements.size;           // the size of the memory blocks you want to allocate on the device
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);  // index ino the physical devices memory types array
 
 		if (vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate vertex buffer memory!");
 		}
 
-		vkBindBufferMemory(device_, buffer, bufferMemory, 0);
+		vkBindBufferMemory(device_, buffer, bufferMemory, 0);  // links the memory block to the buffer
 	}
 
+	/*The beginSingleCommand() a function with no arguments is of type VkCommandBuffer which is a vulkan handle 
+	  is a helper or utility function that allocates and begins a primary command buffer intended for a single-term use 
+	  like a one-time copy operation or transition it is typically used for short lived operations, 
+	  such as copying to buffer data or transition image layouts during initialization
+	  1. we instanced the VkCommandBufferAllocateInfo struct via alloInfo which job is tell vulkan how many command buffers
+	     to allocate and from which command pool
+		 .sType is an instance of VKStructure Type that sets the type of struct required by vulkan
+		 .level  is assigned VK_COMMAND_BUFFER_LEVEL_PRIMARY meaning that we are telling vulkan to submit directly to a queue
+		 unlike VK_COMMAND_BUFFER_LEVEL_SECONDARY which is used differently so here we allocating a primary command buffer
+		 .commandPool is assigned commanPool instance of VKCommandPool a vulkan handle  which Specifies the command pool 
+		   from which the buffer should be allocated
+		 .commandBufferCount is assigned 1 meaning only 1 buffer is being allocated
+
+	  2. VkCommandBuffer is the handle to the command buffer you want to begin recording which we have already allocated 
+		 via vkAllocateCommandBuffers() function
+	  3. vkAllocateCommandBuffers() is a vulkan function that allocates one or more command buffer from a command pool
+	     and fills the commandBuffer with the allocated command buffer handle it takes the device_, 
+         a reference to the allocInfo struct and a pointer to the commandBuffer handle
+	  4. we then instanced VkCommandBufferBeginInfo struct via beginInfo which is used to control how a command
+	     buffer is recorded and how it interacts with other command buffers and then we specify it's parameters
+		 for beginning a command buffer recording with sType which is an instance of VKStructure Type and flags which is a bitmask
+	  5. we call vkBeginCommandBuffer() which is a vulkan function that begins recording commands into the command buffer
+		 it takes the commandBuffer handle and a reference to the beginInfo struct
+	  6. Finally, the function returns the commandBuffer handle which is now ready for recording commands
+	  */
 	VkCommandBuffer IkeDeviceEngine::beginSingleTimeCommands() {
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		VkCommandBufferAllocateInfo allocInfo{};                             // initializes a struct with zero/default values
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;   //  required for vulkan structures to identify them self
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandPool = commandPool;
 		allocInfo.commandBufferCount = 1;
 
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(device_, &allocInfo, &commandBuffer);
+		VkCommandBuffer commandBuffer;                                   // the handle we need to begin recording
+		vkAllocateCommandBuffers(device_, &allocInfo, &commandBuffer);   //
 
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		VkCommandBufferBeginInfo beginInfo{};                           // initializes a struct with zero/default values
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;  // Required for vulkan structures to identify them self
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;  // Specifies that the command buffer will be used for a single submission
 
 		vkBeginCommandBuffer(commandBuffer, &beginInfo);
 		return commandBuffer;
 	}
+
+	/* endSingleTimeCommands() is a function with one argument of type VkCommandBuffer which is a vulkan handle
+	   it is used to end the recording of commands in a single-use command buffer and submit it to the graphics queue
+	   this is used together with beginSinlgeTimeCommands() notice that VkCommandBuffer is it's argument unlike the 
+	   beginSingleTimeCommand which called VkCommandBuffer inside it's function
+	   1. we call vkEndCommandBuffer() which is a vulkan function that ends the recording of commands in the command buffer
+	      it ends recording commands into the buffer,it must be called before we can submit to a queue and if the buffer
+		  isn't properly ended, submission will fail
+	   2. we then instanced VkSubmitInfo struct via submitInfo which is used to specify parameters for submitting command buffers to a queue
+		  .sType is an instance of VKStructure Type that sets the type of struct required by vulkan
+		  .commandBufferCount is set to 1 meaning we are submitting only one command buffer
+		  .pCommandBuffers is a pointer to an array of command buffers to be submitted, in this case, 
+		  it points to the address of commandBuffer the reason we are referencing it
+	   3. we call vkQueueSubmit() which is used to send recorded command buffer to the graphics queue so that the GPU can execute them
+		  it takes the graphicsQueue_ an instance of VkQueue handle where work is submitted,
+		  the number of submition we are making in this case is 1, a reference to submitInfo struct and 
+		  a fence handle which is set to VK_NULL_HANDLE
+	   4. we then call vkQueueWaitIdle() with graphicsQueue_ as an argument. it waits for the graphics queue to become idle, 
+	      ensuring all submitted commands are completed before proceeding meaning it blocks the CPU until all previously
+		  submitted GPU work on the given VkQueue is fully completed
+	   5. Finally, we free the command buffer using vkFreeCommandBuffers() which releases the resources associated with the command buffer
+	      and returns their memory to the pool from which they were allocated
+		  it takes the device_, commandPool and number of command buffers(1) and a pointer to the commandBuffer handle
+	*/
 	void IkeDeviceEngine::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
 		vkEndCommandBuffer(commandBuffer);
 
@@ -634,7 +744,27 @@ namespace ikE {
 		vkFreeCommandBuffers(device_, commandPool, 1, &commandBuffer);
 
 	}
+	/* copyBuffer() is a utility/helper function that performs a GPU-side memory copy from one vulkan buffer
+	   (srcBuffer) to another (dstBuffer) using a temporary (single-use) command buffer
+	   1. we start by objectifying VkCommandBuffer struct with commandBuffer and assign beginSingleTimeCommand() to it
+	   the reason for this is the beginSingleTimeCommands() function allocates and begin recording a primary command
+	   buffer intended for one-time submission
+	   2. we then instance the VkBufferCopy a struct  with it's parameters which are all an instance VkDeviceSize
+	      that is (typedef uint64_t VkDeviceSize) 
+	      .srcOffset is the byter offset from the start of the source buffer which defines a region of memory to read from 
+	      .dstOffset which is the start of the destination buffer where the data will be written 0th index ,
+		  .size is the total number of bytes to copy from srcOffset to dstOffset this defines the length of the
+		  memory region being transfered
 
+	   3. then we call vkCmdCopyBuffer() with its parameters it copy buffersize bytes from staging buffer to the deviceBuffer
+	      the commandBuffer is an instance of VkCommandBuffer which we are recording the copy command into and it must be
+		  in a recording state
+		  the srcBuffer which is the GPUbuffer we are copying from and must be created with VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+		  ths dstBuffer which is the GPUbuffer we are copying into and must be created with VK_BUFFER_USAGE_TRANSFER_DST_BIT
+		  1 is the number of regions to copy meaning number of VkBufferCopy structure
+		  and reference to the copyRegion
+		  then we call endSingleTimeCommands() with commandBuffer as argument this 
+	   */
 	void IkeDeviceEngine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -646,7 +776,42 @@ namespace ikE {
 
 		endSingleTimeCommands(commandBuffer);
 	}
+	/*the copyBufferToImage is a function that help us copy data from a Vulkan Buffer to a Vulkan Image, which is necessary and 
+	  commonly used for transfering textures data into GPU memory and take in five parameters
+	   buffer which contains the source image data i.e texture pixtels
+	   image which will recieve the data
+	   width and height dimensions of the image
+	   layerCount Number of image array layers(useful for 3d textures or cube maps)
+	   now we are going to use the helper functions to begin and end recording
+	   we star with beginSingleTimeCommands() that is assigned to commandBuffer which is an instance of VkCommandBuffer
+	   that allocates and begins recording with VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+	   the VkBufferImageCopy struct is instanced by region which will describe the region of data that should be copied
+	   .bufferOffset = 0 starts at the beginning of the buffer
+	   .bufferRowLength = 0 tell vulkan that rows in the buffer are tightly packed i.e use imageExtent.width as row length
+	   .bufferImageHeight = 0 also tightly vertically packed 
+	   .imageSubresource which is a member of VkBufferImageCopy is also a struct and it defines which layers and mipmap level
+	    of image to target
+		.aspectMask is for color images
+		.miplevel represents a specific level or detail of a texture image it is used to optimize rendering performance and
+		 improve visual quality assignig 0 to it means we will need to generate other miplevel manually or via gpu later
+		 because 0 is just copying to the base
+		.baseArrayLayer = 0 means we are starting from the first array layer
+		.layerCount is the total number of layers to update
+		.imageOffset tells us to start writing at the top-left corner of the image where (x=0,y=0,z=0)
+	    .imageExtent Defines the full size of the region to write to and the Depth is 1 which means it is a 2d image
+		then we call vkCmdCopyBufferToImage() which is use to copy data from a buffer to an image typically used for
+		uploading texture data from cpu to gpu it's parameters are
+		commandBuffer the command buffer we're recording into
+		buffer the source buffer
+		image the destination buffer
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL the must be in this layout before copying
+		1 the number of regions to copy and 
+		a reference to region which is a pointer to the struct we set up
+		then we call endSingleTimeCommands with the commandBuffer as an argument which
+		ends the command buffer,submits it to a graphic or transfer queue, waits for completion and frees the command buffer
 
+
+	   */
 	void IkeDeviceEngine::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) {
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -666,7 +831,29 @@ namespace ikE {
 		vkCmdCopyBufferToImage(commandBuffer,buffer,image,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 		endSingleTimeCommands(commandBuffer);
 	}
+	/*createImageWithInfo() is a helper function that creates vulkan image,allocates memory for it and 
+	  binds the memory to image it has four parameters
+	  VkImageCreateInfo struct that was made a const ,reference and instanced describes and create
+	  image resource via VkImage in vulkan which is a memory resource that can represent texture,render targets
+	  depth buffers or storage images.
+	  VkMemoryPropertyFlags represent flags for memory properties (i.e VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+	  VkImage output vulkan image handle
+	  VkDeviceMemory output vulkan device memory handle
+	  then we call vkCreateImage() that will create a vulkan VkImage using imageInfo,it stores the resulting
+	  image handle with image ,because it needs a logical device handle so we also include device_ and if it fails and exception is thrown
+	  then we get the memory requirments via VkMemoryRequirements
+	  then we query vkGetImageMemoryRequiremtens() which is to query how much GPU memory is required for Vulkan image(created with vkCreateImage)
+	  we then Allocate memory via VkMemoryAllocateInfo struct
+	  and check if vkAllocateMemory() memory which is used for allocating raw GPU memory from the logical device
+	  it first request the Vulkan driver via device_ to reserve a contiguous memory block from the devices memory pool
+	  a reference to VkMemoryAllocateInfo struct which is tells vulkan how much memory and what type we want
+	  null for the pnext pointer which is reserved for extensions
+	  and VkDeviceMemory reference which vulkan will fill with the handle to the newly allocated memory block and
+	  which will be passed later to vkBindImageMemory()
+	  we use an if statement to call vkBindImageMemory() which is used to bind the allocated memory to the image
+	  we call the device_,bind the imageMemory to image and 0 is the offset means that the memory starts from the begining
 
+	  */
 	void IkeDeviceEngine::createImageWithInfo(
 		const VkImageCreateInfo& imageInfo,
 		VkMemoryPropertyFlags properties,

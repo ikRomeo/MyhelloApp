@@ -1,0 +1,22 @@
+# Set default behavior to normalize line endings
+* text=auto
+
+# Explicitly declare text files you want normalized
+*.cpp text
+*.hpp text
+*.c text
+*.h text
+*.txt text
+*.sln text
+*.cmake text
+*.glsl text
+
+# Binary files - don't touch line endings
+*.png binary
+*.jpg binary
+*.exe binary
+*.dll binary
+
+# For scripts (shell, python, etc.) force LF endings
+*.sh text eol=lf
+*.py text eol=lf

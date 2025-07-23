@@ -1,0 +1,66 @@
+
+ ikwindow.hpp file
+
+1. [] we create the header Guards
+inside the header Guard
+2. [] we create a namespace ikE block   
+inside the namespace block
+3. [] we create a class IkeWindow{};
+because we are using Glfw it is safe to now
+  * include the header that tells glfw to include vulkan 
+  * include the glfw.h file which is what glfw uses
+inside the classs Window
+Private section
+    [] we will get the GlfwWindow handler via a pointer variable nane window
+    [] we will declare an initWindow() with not parameter
+    [] the initWindow will need a width and a height which most not be modified so we will declare two const int variable 
+    [] we will create an std::string which will hold the name of the window
+because we are using std::string it is safe to say we need to add the header file
+
+Public section
+   [] we will need to declare the constructor and the destructor
+      the constructor will have the width,height and name as parameter
+      the destructor has no parameter
+
+
+
+ ikwindow.cpp file
+because we only declare the variables and class in ikewindow.hpp here we will define them
+  [] we include ikwindow.hpp
+  [] we will use the namespace ikE block
+inside the namespace
+     [] we will initialize the constructor with variables
+        * the width, heigth, the windows name 
+	* inside the constructor we will call the initwindow() 
+  [] we define the intiwindow function
+     # Note: the initwindow() has the return type::the class::then the function
+     #       i.e void IkeWindow::initWindow(){};
+        * inside the initWindow(),we will
+	  * hint to the glfwWindowHint that we do not need opengl api 
+	  * hint to the glfwWindowHint not to resize , we will deal with that when the time comes
+          * we will call the glfwCreateWindow() with the
+	    * WIDTH,HEIGHT,windowName.c_str(),nullptr,nullptr
+  [] we will now implement the destructor method of the class IkeWindow, under the constructor
+     # inside the IkeWindow::~IkeWindow destructor
+       * we will call the glfwWindowdestroy() that takes the window as an argurment
+       * we will call glfwTerminate with no argument to terminate the window resource
+
+We now move on to create another  hpp and cpp file that where we can run the program
+
+First_App.hpp file
+   
+  [] we will include the ikwindow.hpp file
+  [] we create a header guard
+   # inside the header guard
+   we will use the same namespace ikE block
+# inside the namespace
+  [] we will create the First_App class{}
+# inside the First_App class
+Public section
+    * we will define a static constexpr WIDTH = 800;
+    * we will define a static constexpr HEIGHT = 600;
+    * we will call the void run() {};
+    # we have to use dangling braces for now just to run the code late we will define the run()
+Public section
+    * we will instantiate the IkeWindow ikeWindow{ WIDTH,HEIGHT, " a string to convey information i.e hello bro"};
+
