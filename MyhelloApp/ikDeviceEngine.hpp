@@ -1,5 +1,5 @@
-﻿#ifndef IKEDEVICEENGINE_HPP
-#define  IKEDEVICEENGINE_HPP
+﻿#ifndef IKDEVICEENGINE_HPP
+#define  IKDEVICEENGINE_HPP
 
 #include "ikWindow.hpp"
 
@@ -55,6 +55,7 @@ namespace ikE{
       IkeDeviceEngine& operator=(IkeDeviceEngine&&) = delete;
 
       //getter functions
+      VkCommandPool getCommandPool() { return commandPool; };
       VkDevice device() { return device_; };
 
       //surface() needs explanation
@@ -73,6 +74,8 @@ namespace ikE{
       VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
       //Buffer Helper functions
+      //public createcommandpool
+      void createCommandPool();
 
       void createBuffer(
           VkDeviceSize size,
@@ -103,7 +106,7 @@ namespace ikE{
       void pickPhysicalDevice();
       void createLogicalDevice();
       //
-      void createCommandPool();
+      //void createCommandPool();
 
 
     //helper functions

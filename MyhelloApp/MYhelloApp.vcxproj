@@ -154,6 +154,7 @@
     <ClCompile Include="First_App.cpp" />
     <ClCompile Include="ikDeviceEngine.cpp" />
     <ClCompile Include="ikPipeline.cpp" />
+    <ClCompile Include="ikSwapChain.cpp" />
     <ClCompile Include="ikWindow.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -166,6 +167,7 @@
     <ClInclude Include="First_App.hpp" />
     <ClInclude Include="ikDeviceEngine.hpp" />
     <ClInclude Include="ikPipeline.hpp" />
+    <ClInclude Include="ikSwapChain.hpp" />
     <ClInclude Include="ikWindow.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

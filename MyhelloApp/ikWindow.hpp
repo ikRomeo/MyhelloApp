@@ -15,6 +15,8 @@ namespace ikE {
 		IkeWindow& operator = (const IkeWindow) = delete;
 
 		bool shouldClose() { return glfwWindowShouldClose(window); }
+		//Note explanation
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width),static_cast<uint32_t>(height) }; }
 		
 		//Note explanation
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);

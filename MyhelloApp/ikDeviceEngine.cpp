@@ -193,7 +193,14 @@ namespace ikE {
 		vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
 
 	}
+
 	// this needs explanation
+	/*commandPool are opaque objects which command buffer memory are allocated from 
+	an application may need to create and destroy command buffers frequently so to reduce
+	the cost of resource creation vulkan has to allocate and free command from command pools 
+	in this way the most expensive step of acquiring memory can be done once, then reused as
+	buffers are created and destroyed 
+	we will access this function via getCommandPool() */
 	void IkeDeviceEngine::createCommandPool() {
 		QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
