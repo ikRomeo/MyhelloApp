@@ -641,7 +641,7 @@ namespace ikE {
 
 	void IkeDeviceEngine::createBuffer(
 		VkDeviceSize size,                   //the size in bytes of the buffer to create
-		VkBufferUsageFlags usage,            // how the buffer will be used e.g vertx buffer, uniform buffer
+		VkBufferUsageFlags usage,            // how the buffer will be used e.g vertex buffer, uniform buffer
 		VkMemoryPropertyFlags properties,    // Specifies memory requirements e.g devic-local,host-visible
 		VkBuffer& buffer,                    // Output parameter, the created vulkan handle
 		VkDeviceMemory& bufferMemory) {      // Output parameter, the allocated device memory backing the buffer
@@ -656,8 +656,8 @@ namespace ikE {
 			throw std::runtime_error("failed to create vertex buffer!");  // if the vkCreateBuffer fails it throws a runtime error
 		}
 
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device_, buffer, &memRequirements);
+		VkMemoryRequirements memRequirements;   
+		vkGetBufferMemoryRequirements(device_, buffer, &memRequirements); // we then query the memory requirments
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

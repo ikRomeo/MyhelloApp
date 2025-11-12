@@ -1,10 +1,15 @@
-﻿#ifndef IKDEVICEENGINE_HPP
+﻿#pragma once
+#ifndef IKDEVICEENGINE_HPP
 #define  IKDEVICEENGINE_HPP
 
 #include "ikWindow.hpp"
 
 #include <vector>
 #include <string>
+
+//#include <vulkan/vulkan.h>
+
+
 
 //notice that there are two struct that is outside the class and like the class they are all undernamespace ikE
 namespace ikE{
@@ -49,7 +54,7 @@ namespace ikE{
       ~IkeDeviceEngine();
 //not copyable 
       IkeDeviceEngine(const IkeDeviceEngine&) = delete;
-      void operator=(const IkeDeviceEngine&) = delete;
+      IkeDeviceEngine& operator=(const IkeDeviceEngine&) = delete;
 //not movable
       IkeDeviceEngine(const IkeDeviceEngine&&) = delete;
       IkeDeviceEngine& operator=(IkeDeviceEngine&&) = delete;
@@ -127,10 +132,14 @@ namespace ikE{
       VkInstance instance;
       VkDebugUtilsMessengerEXT debugMessenger;
       IkeWindow& window;
+      /*VkPhysicalDevice Represents the actual GPU hardware e.g your NVIDIA RTX,AMD Radeon, or Intel GPU
+        we set it to vk_null_handle before it is properly created or assigned*/
       VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
       VkCommandPool commandPool;
 
       //getters headers
+      /*VkDevice is the logical device a software connection to the GPU, it
+      defines how we communicate with the hardware(queues,features, extensions,e.t.c*/
       VkDevice device_;
       //
       VkSurfaceKHR surface_;

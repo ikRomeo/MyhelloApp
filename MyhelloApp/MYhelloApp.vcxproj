@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="First_App.cpp" />
     <ClCompile Include="ikDeviceEngine.cpp" />
+    <ClCompile Include="ikEngineModel.cpp" />
     <ClCompile Include="ikPipeline.cpp" />
     <ClCompile Include="ikSwapChain.cpp" />
     <ClCompile Include="ikWindow.cpp" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="First_App.hpp" />
     <ClInclude Include="ikDeviceEngine.hpp" />
+    <ClInclude Include="ikEngineModel.hpp" />
     <ClInclude Include="ikPipeline.hpp" />
     <ClInclude Include="ikSwapChain.hpp" />
     <ClInclude Include="ikWindow.hpp" />

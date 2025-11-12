@@ -5,6 +5,8 @@
 #include "ikDeviceEngine.hpp"
 #include <vulkan/vulkan.h>
 
+//std
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,10 +17,11 @@ namespace ikE {
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 		ikEngineSwapChain(IkeDeviceEngine& deviceref, VkExtent2D windowExtent);
+		ikEngineSwapChain(IkeDeviceEngine& deviceref, VkExtent2D windowExtent,std::shared_ptr<ikEngineSwapChain> previous);
 		~ikEngineSwapChain();
 
 		ikEngineSwapChain(const ikEngineSwapChain&) = delete;
-		void operator=(const ikEngineSwapChain&) = delete;
+		ikEngineSwapChain& operator=(const ikEngineSwapChain&) = delete;
 
 		VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
 		VkRenderPass getRenderPass() { return renderPass; }
@@ -38,6 +41,7 @@ namespace ikE {
 		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
 	private:
+		void init();
 		void createSwapChain();
 		void createImageViews();
 		void createRenderPass();
@@ -67,7 +71,8 @@ namespace ikE {
 		VkExtent2D windowExtent;    
 
 		VkSwapchainKHR swapChain;
-         
+		std::shared_ptr<ikEngineSwapChain> oldSwapChain;
+
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
 		std::vector<VkFence>     inFlightFences;

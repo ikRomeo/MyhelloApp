@@ -47,16 +47,21 @@ namespace ikE {
 
        */
     struct PipelineConfigInfo {
-        VkViewport viewport;
-        VkRect2D scissor;
-        //        VkPipelineViewportStateCreateInfo viewportInfo;
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator = (const PipelineConfigInfo&) = delete;
+       //new
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        //
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo  multisampleInfo;
         VkPipelineColorBlendAttachmentState colorBlendAttachment;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-
+        //new
+        std::vector<VkDynamicState> dynamicStateEnables;
+        VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+        //
         VkPipelineLayout pipelineLayout = nullptr;
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
@@ -75,13 +80,14 @@ namespace ikE {
 
         //we delete the copy constructors
         ikePipeline(const ikePipeline&) = delete;
-        void operator=(const ikePipeline&) = delete;
+        ikePipeline& operator=(const ikePipeline&) = delete;
 
         // needs explanation
         void bind(VkCommandBuffer commandBuffer);
 
 
-        static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+       // static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
     private:
         static std::vector<char> readFile(const std::string& filepath);

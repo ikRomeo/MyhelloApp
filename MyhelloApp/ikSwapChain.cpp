@@ -11,15 +11,29 @@
 namespace ikE {
 	ikEngineSwapChain::ikEngineSwapChain(IkeDeviceEngine& deviceref, VkExtent2D extent) 
 		                                  : device{ deviceref }, windowExtent{ extent } {
-
-	  createSwapChain();
-	  createImageViews();
-	  createRenderPass();
-	  createDepthResources();
-	  createFramebuffers();
-      createSyncObjects();
+		init();
 	
 	}
+	ikEngineSwapChain::ikEngineSwapChain(IkeDeviceEngine& deviceref, VkExtent2D extent, std::shared_ptr<ikEngineSwapChain> previous)
+		: device{ deviceref }, windowExtent{ extent }, oldSwapChain{ previous } {
+		init();
+
+		// clean up old swap chain since it's no longer needed
+		oldSwapChain = nullptr;
+
+	}
+
+
+	void ikEngineSwapChain::init() {
+
+		createSwapChain();
+		createImageViews();
+		createRenderPass();
+		createDepthResources();
+		createFramebuffers();
+		createSyncObjects();
+        }
+
 
 	ikEngineSwapChain::~ikEngineSwapChain() {
 		for (auto imageView : swapChainImageViews) {
@@ -273,7 +287,7 @@ namespace ikE {
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE;
 
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
+		createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
 		if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create swap chains!");
@@ -645,7 +659,7 @@ namespace ikE {
 	}
 	VkSurfaceFormatKHR ikEngineSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 		for (const auto& availableFormat : availableFormats) {
-			if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
 				return availableFormat;
 			}
 		}
@@ -653,12 +667,23 @@ namespace ikE {
 	}
 
 	VkPresentModeKHR ikEngineSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+		//MailBox(low letency,no tearing)
 		for (const auto& availablePresentMode : availablePresentModes) {
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
 				std::cout << "Present mode: Mailbox" << std::endl;
 				return availablePresentMode;
 			}
 		}
+		// Then try IMMEDIATE (low latency, may tear)
+		for (const auto& mode : availablePresentModes) {
+			if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+				std::cout << "Present mode: Immediate (may tear)" << std::endl;
+				return mode;
+			}
+		}
+
+
+
 		std::cout << "Present mode: V-Sync" << std::endl;
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
