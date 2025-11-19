@@ -3,10 +3,12 @@
 
 
 #include "ikDeviceEngine.hpp"
+#include "ikEngineModel.hpp"
+#include "ikgameObject.hpp"
 #include "ikPipeline.hpp"
 #include "ikSwapChain.hpp"
 #include "ikWindow.hpp"
-#include "ikEngineModel.hpp"
+
 
 //std
 #include <memory>
@@ -28,7 +30,8 @@ namespace ikE {
 
 	private:
 		//new functions which needs explanation
-		void loadModels();
+		//void loadModels();
+		void loadGameObjects();
 		void createPipelinelayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -36,6 +39,7 @@ namespace ikE {
 		void drawFrame();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		IkeWindow   ikeWindow{ WIDTH,HEIGTH,"HELLO GUYS" };
 
@@ -49,7 +53,8 @@ namespace ikE {
 		std::unique_ptr<ikePipeline> Pipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<ikEngineModel> ikModel;
+		//std::unique_ptr<ikEngineModel> ikModel;
+		std::vector<IkgameObject> gameObjects;
 	};
 
 } //namepace

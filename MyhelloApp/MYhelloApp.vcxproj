@@ -168,6 +168,7 @@
     <ClInclude Include="First_App.hpp" />
     <ClInclude Include="ikDeviceEngine.hpp" />
     <ClInclude Include="ikEngineModel.hpp" />
+    <ClInclude Include="ikgameObject.hpp" />
     <ClInclude Include="ikPipeline.hpp" />
     <ClInclude Include="ikSwapChain.hpp" />
     <ClInclude Include="ikWindow.hpp" />
