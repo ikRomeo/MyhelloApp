@@ -87,6 +87,9 @@ namespace ikE {
 	// VK_NULL_HANDLE because we called the vkWaitForFences() earlier the parameter is not used
 	// and the imageIndex which is the argument of our acquireNextImage()
 	// the we return the result
+	
+	// Note that this code needs to be refactored because the validation layer is warning us
+	// about the acquireswapchain per frame instead of per image
 	VkResult ikEngineSwapChain::acquireNextImage(uint32_t* imageIndex) {
 		vkWaitForFences(device.device(), 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 	
@@ -98,6 +101,14 @@ namespace ikE {
 		
 		return result;
 	}
+	
+
+
+
+
+
+
+
 
 	// submitCommandBuffers() with three parameter list is responsible for 
 	// submitting a recorded command buffer to the GPU for rendering
