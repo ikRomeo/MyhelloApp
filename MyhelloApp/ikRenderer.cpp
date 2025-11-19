@@ -33,12 +33,14 @@ namespace ikE {
 			ikSwapChain = std::make_unique<ikEngineSwapChain>(ikeDevice, extent);
 		}
 		else {
-			ikSwapChain = std::make_unique<ikEngineSwapChain>(ikeDevice, extent, std::move(ikSwapChain));
-			if (ikSwapChain->imageCount() != commandBuffers.size()) {
-				freeCommandBuffers();
-				createCommandBuffers();
-
+			std::shared_ptr<ikEngineSwapChain> oldSwapChain = std::move(ikSwapChain);
+			ikSwapChain = std::make_unique<ikEngineSwapChain>(ikeDevice, extent, oldSwapChain);
+			
+			if (!oldSwapChain->compareSwapFormats(*ikSwapChain.get())) {
+				throw std::runtime_error("Swap chain image(or depth) format has changed!");
 			}
+
+			
 		}
 		//we will come back to this
 
@@ -48,7 +50,7 @@ namespace ikE {
 
 
 	void ikE::IkeRenderer::createCommandBuffers() {
-		commandBuffers.resize(ikSwapChain->imageCount());
+		commandBuffers.resize(ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

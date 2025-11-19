@@ -3,11 +3,8 @@
 
 
 #include "ikDeviceEngine.hpp"
-
-//#include "ikEngineModel.hpp"
-
 #include "ikgameObject.hpp"
-#include "ikPipeline.hpp"
+
 #include "ikRenderer.hpp"
 #include "ikWindow.hpp"
 //std
@@ -29,22 +26,14 @@ namespace ikE {
 		void run();
 
 	private:
-		//new functions which needs explanation
-		//void loadModels();
+	
 		void loadGameObjects();
-		void createPipelinelayout();
-		void createPipeline();
-		void renderGameObjects(VkCommandBuffer commandBuffer);
+	
 
 		IkeWindow   ikeWindow{ WIDTH,HEIGTH,"HELLO GUYS" };
-
 		IkeDeviceEngine ikeDeviceEngine{ ikeWindow };
 		IkeRenderer IkRenderer{ ikeWindow,ikeDeviceEngine };
 
-
-		
-		std::unique_ptr<ikePipeline> Pipeline;
-		VkPipelineLayout pipelineLayout;
 		std::vector<IkgameObject> gameObjects;
 	};
 
