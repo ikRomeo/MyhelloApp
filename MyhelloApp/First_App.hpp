@@ -3,13 +3,13 @@
 
 
 #include "ikDeviceEngine.hpp"
-#include "ikEngineModel.hpp"
+
+//#include "ikEngineModel.hpp"
+
 #include "ikgameObject.hpp"
 #include "ikPipeline.hpp"
-#include "ikSwapChain.hpp"
+#include "ikRenderer.hpp"
 #include "ikWindow.hpp"
-
-
 //std
 #include <memory>
 #include <vector>
@@ -34,26 +34,17 @@ namespace ikE {
 		void loadGameObjects();
 		void createPipelinelayout();
 		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
-		void recreateSwapChain();
-		void recordCommandBuffer(int imageIndex);
 		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		IkeWindow   ikeWindow{ WIDTH,HEIGTH,"HELLO GUYS" };
 
-		//we take the ikeWindow here after we create createShaderModule
 		IkeDeviceEngine ikeDeviceEngine{ ikeWindow };
-		//ikEngineSwapChain ikEngineSwapChain{ ikeDeviceEngine,ikeWindow.getExtent() };
-		std::unique_ptr<ikEngineSwapChain> ikSwapChain;
+		IkeRenderer IkRenderer{ ikeWindow,ikeDeviceEngine };
 
-		// we councel the ikePipeline struct and use an unique pointer instead
-        //ikePipeline ikePipeline{ikeDeviceEngine,"frag.spv","vert.spv",ikePipeline::defaultPipelineConfigInfo(WIDTH,HEIGTH)};
+
+		
 		std::unique_ptr<ikePipeline> Pipeline;
 		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
-		//std::unique_ptr<ikEngineModel> ikModel;
 		std::vector<IkgameObject> gameObjects;
 	};
 
