@@ -26,6 +26,7 @@ namespace ikE {
 
 		VkRenderPass getSwapChainRenderPass() const {
 			return ikSwapChain->getRenderPass();}
+		float getAspectRatio() const { return ikSwapChain->extentAspectRatio(); }
 
 		bool isFrameInProgress() const { return isFrameStarted; };
 

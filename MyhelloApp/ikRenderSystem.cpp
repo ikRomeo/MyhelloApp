@@ -71,7 +71,7 @@ namespace ikE {
 	}
 
 	//needs explanation
-	void IkRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<IkgameObject>& gameObjects) {
+	void IkRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<IkgameObject>& gameObjects, const IkCamera& camera) {
 		Pipeline->bind(commandBuffer);
 
 		for (auto& obj : gameObjects) {
@@ -84,7 +84,7 @@ namespace ikE {
 
 			SimplePushConstantData push{};
 			push.color = obj.color;
-			push.transform = obj.transform.mat4();
+			push.transform = camera.getProjection() * obj.transform.mat4();
 
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,

@@ -1,7 +1,7 @@
 #ifndef IKRENDERSYSTEM_HPP
 #define IKRENDERSYSTEM_HPP
 
-
+#include "ikCamera.hpp"
 #include "ikDeviceEngine.hpp"
 #include "ikgameObject.hpp"
 #include "ikPipeline.hpp"
@@ -21,7 +21,7 @@ namespace ikE {
 		IkRenderSystem(const IkRenderSystem&) = delete;
 		IkRenderSystem& operator =(const IkRenderSystem&) = delete;
 
-        void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<IkgameObject> &gameObjects);
+        void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<IkgameObject> &gameObjects, const IkCamera &camera);
 
 	private:
 		

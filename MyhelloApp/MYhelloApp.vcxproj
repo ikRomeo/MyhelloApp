@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="First_App.cpp" />
+    <ClCompile Include="ikCamera.cpp" />
     <ClCompile Include="ikDeviceEngine.cpp" />
     <ClCompile Include="ikEngineModel.cpp" />
     <ClCompile Include="ikPipeline.cpp" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="First_App.hpp" />
+    <ClInclude Include="ikCamera.hpp" />
     <ClInclude Include="ikDeviceEngine.hpp" />
     <ClInclude Include="ikEngineModel.hpp" />
     <ClInclude Include="ikgameObject.hpp" />
