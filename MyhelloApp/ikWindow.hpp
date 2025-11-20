@@ -21,6 +21,7 @@ namespace ikE {
 		bool wasWindowResized() { return framebufferResized; }
 		void resetWindowResizedFlag() { framebufferResized;  }
 
+		GLFWwindow* getGLFWwindow() const { return window; }
 
 		//Note explanation
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);

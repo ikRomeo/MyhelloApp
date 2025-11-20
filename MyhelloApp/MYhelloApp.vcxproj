@@ -160,6 +160,7 @@
     <ClCompile Include="ikRenderSystem.cpp" />
     <ClCompile Include="ikSwapChain.cpp" />
     <ClCompile Include="ikWindow.cpp" />
+    <ClCompile Include="KeyBoardMovementController.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,6 +179,7 @@
     <ClInclude Include="ikRenderSystem.hpp" />
     <ClInclude Include="ikSwapChain.hpp" />
     <ClInclude Include="ikWindow.hpp" />
+    <ClInclude Include="KeyBoardMovementController.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
