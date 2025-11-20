@@ -38,7 +38,7 @@ namespace ikE {
 		   
 		   */
 		struct Vertex {
-			glm::vec2 position;
+			glm::vec3 position;
 			glm::vec3 color;  //new
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
