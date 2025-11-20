@@ -18,8 +18,9 @@ namespace ikE {
 	  private section of the class ikEngineModel
 	  inside the initialize list function we call the createVertexBuffers() with vertices as argument
 	  */
-	ikEngineModel::ikEngineModel(IkeDeviceEngine &device, const std::vector<Vertex>& vertices) : IkeDevice(device) {
-		createVertexBuffers(vertices);
+	ikEngineModel::ikEngineModel(IkeDeviceEngine &device, const ikEngineModel::Builder& builder) : IkeDevice(device) {
+		createVertexBuffers(builder.vertices);
+		createIndexBuffers(builder.indices);
 
 	}
 	/* in the destructor
@@ -29,6 +30,11 @@ namespace ikE {
 	ikEngineModel::~ikEngineModel() {
 		vkDestroyBuffer(IkeDevice.device(), vertexBuffer, nullptr);
 		vkFreeMemory(IkeDevice.device(), vertexBufferMemory, nullptr);
+
+		if (hasIndexBuffer) {
+			vkDestroyBuffer(IkeDevice.device(), indexBuffer, nullptr);
+			vkFreeMemory(IkeDevice.device(), indexBufferMemory, nullptr);
+		}
 	}
 
 	/*
@@ -56,25 +62,73 @@ namespace ikE {
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3!");
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
-		IkeDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory);
 
-		/* this code is part of uploading vertex data from Cpu memory to gpu buffer
-		   void data allows the function to return a pointer to the caller in vkMapMemory() it is a pointer to a pointer
-		   vkMapMemory() with argument the device, vertexBufferMemory which is the VkDevicememory
-		   VkDeviceSize which is 0 , bufferSize which is VkDeviceSize , vkMemoryMapFlags which is 0 and reference to the data
-		   memcpy() copies raw bytes, no type information lets break it down because vkMapMemory gives data a pointer to CPU-visible GPU memory
-		   memcpy takes the destination which is data, the Source which is vertices.data() which is a pointer to 
-		   the first element of std::vector<Vertex>, the Size which is the bufferSize and we get it by doing sizeof(Vertex) * vertices.size() and because
-		   VkDeviceSize is a uint64_t type memcpy expects the third argument to be a size_t type which is uint32_t so we use static_cast to cast it to the newtype
-		   even though we risk data loss
-		   vkUnmapMemory tells vulkan that we are done accessing the mapped memory
-		   the IkeDevice.device() is the logical memory and vertexBufferMemory which is of VkDeviceMemory is the memory object previously mapped */
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+		IkeDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+		
 		void* data;
-		vkMapMemory(IkeDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
+		vkMapMemory(IkeDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(IkeDevice.device(), vertexBufferMemory);
+		vkUnmapMemory(IkeDevice.device(), stagingBufferMemory);
+
+		IkeDevice.createBuffer(bufferSize, 
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, 
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+		IkeDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+		vkDestroyBuffer(IkeDevice.device(), stagingBuffer, nullptr);
+		vkFreeMemory(IkeDevice.device(), stagingBufferMemory, nullptr);
 
 	}
+
+	void ikEngineModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
+		indexCount = static_cast<uint32_t>(indices.size());
+		hasIndexBuffer = indexCount > 0;
+		
+		if (!hasIndexBuffer) {
+			return;
+		}
+
+		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		IkeDevice.createBuffer(
+			bufferSize, 
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer, stagingBufferMemory);
+
+
+		void* data;
+		vkMapMemory(IkeDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+		vkUnmapMemory(IkeDevice.device(), stagingBufferMemory);
+
+		IkeDevice.createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+		IkeDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+		vkDestroyBuffer(IkeDevice.device(), stagingBuffer, nullptr);
+		vkFreeMemory(IkeDevice.device(), stagingBufferMemory, nullptr);
+
+
+	
+	
+	}
+
+
+
+
+
+
 	/* with the draw() we then issue a draw command inside the commandBuffer which is of type VkCommandBuffer 
 	   inside it's function we call vkCmdDraw that take 5 arguments
 	   (the commandBuffer, 
@@ -84,9 +138,15 @@ namespace ikE {
 	    0 means the firstInstance(state at instance index 0))
 	*/
 	void ikEngineModel::draw(VkCommandBuffer commandBuffer) {
-		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-
+		if (hasIndexBuffer) {
+			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		}
+		else {
+	        vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		}
 	}
+
+
 	/* Note that before drawing we must bind the vertex buffer
 	   with the bind() that also takes the commandBuffer of type VkCommandBuffer 
 	   buffers[] is the array of buffers to bind and in this case it is the VertexBuffer of type VkBuffer as its argument
@@ -97,7 +157,13 @@ namespace ikE {
 		VkBuffer buffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+	
+
+	if (hasIndexBuffer) {
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+	   }
 	}
+
 	/* here we have the vector argument then ikEngineModel the class and Vertex the nested struct and getBindingDescription a member of the static member of the struct Vertex
 	   Notice that we did not use the static keyword here only in the hpp file */
 	std::vector<VkVertexInputBindingDescription>ikEngineModel::Vertex::getBindingDescriptions() {

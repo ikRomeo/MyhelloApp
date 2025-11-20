@@ -45,11 +45,18 @@ namespace ikE {
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 		};
 
+		struct Builder {
+			std::vector<Vertex> vertices{};
+			std::vector<uint32_t> indices{};
+
+		};
+
+
 		/* the constructor
 		   Takes the Device wrapper which is the class IkeDeviceEngine with the help of a reference(&)
 		   operator and the vertex data which is the struct that has the (glm,binding and attribute as members
 		   then we create the destuctor with the tilder and empty function*/
-		ikEngineModel(IkeDeviceEngine &device, const std::vector<Vertex>& vertices);  
+		ikEngineModel(IkeDeviceEngine &device, const ikEngineModel::Builder &builder);  
 		~ikEngineModel();
 
 		ikEngineModel(const ikEngineModel&) = delete;
@@ -61,13 +68,19 @@ namespace ikE {
 
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
-		
+		void createIndexBuffers(const std::vector<uint32_t>& indices);
+
+
 		IkeDeviceEngine &IkeDevice;
 		
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		uint32_t vertexCount;
 
+		bool hasIndexBuffer = false;
+		VkBuffer indexBuffer;
+		VkDeviceMemory indexBufferMemory;
+		uint32_t indexCount;
 
 	};
 
