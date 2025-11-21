@@ -32,7 +32,15 @@ namespace ikE {
     };
 	
 
-	FirstApp::FirstApp() { loadGameObjects(); }
+	FirstApp::FirstApp() { 
+		globalPool =
+			IkDescriptorPool::Builder(ikeDeviceEngine)
+			.setMaxSets(ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
+		loadGameObjects(); 
+	}
+
 	FirstApp::~FirstApp() { }
 
 	void FirstApp::run() {
@@ -44,13 +52,23 @@ namespace ikE {
 				sizeof(GlobalUbo),
 				1,
 				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-			
-			);
-			uboBuffers[i]->map();
-		};
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
-		
+			uboBuffers[i]->map();
+		}
+
+
+		auto globalSetLayout = IkDescriptorSetLayout::Builder(ikeDeviceEngine)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.build();
+
+		std::vector<VkDescriptorSet> globalDescriptorSets(ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < globalDescriptorSets.size(); i++) {
+			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			IkDescriptorWriter(*globalSetLayout, *globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(globalDescriptorSets[i]);
+		}
 
 		IkRenderSystem ikeRenderSystem{ ikeDeviceEngine,IkRenderer.getSwapChainRenderPass() };
         IkCamera camera{};

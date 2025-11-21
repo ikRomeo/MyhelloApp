@@ -154,6 +154,7 @@
     <ClCompile Include="Src\First_App.cpp" />
     <ClCompile Include="Src\ikbuffer.cpp" />
     <ClCompile Include="Src\ikCamera.cpp" />
+    <ClCompile Include="Src\ikDescriptors.cpp" />
     <ClCompile Include="Src\ikDeviceEngine.cpp" />
     <ClCompile Include="Src\ikEngineModel.cpp" />
     <ClCompile Include="Src\ikgameObject.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="Src\First_App.hpp" />
     <ClInclude Include="Src\ikbuffer.hpp" />
     <ClInclude Include="Src\ikCamera.hpp" />
+    <ClInclude Include="Src\ikDescriptors.hpp" />
     <ClInclude Include="Src\ikDeviceEngine.hpp" />
     <ClInclude Include="Src\ikEngineModel.hpp" />
     <ClInclude Include="Src\ikframeInfo.hpp" />

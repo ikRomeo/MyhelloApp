@@ -4,9 +4,11 @@
 
 #include "ikDeviceEngine.hpp"
 #include "ikgameObject.hpp"
-
 #include "ikRenderer.hpp"
 #include "ikWindow.hpp"
+#include "ikDescriptors.hpp"
+
+
 //std
 #include <memory>
 #include <vector>
@@ -34,6 +36,10 @@ namespace ikE {
 		IkeDeviceEngine ikeDeviceEngine{ ikeWindow };
 		IkeRenderer IkRenderer{ ikeWindow,ikeDeviceEngine };
 
+		//note order of declaration matters
+		//it is initialized from top to bottom
+		//and cleaned up in reverse order meaning bottom to top
+		std::unique_ptr<IkDescriptorPool> globalPool{};
 		std::vector<IkgameObject> gameObjects;
 	};
 
