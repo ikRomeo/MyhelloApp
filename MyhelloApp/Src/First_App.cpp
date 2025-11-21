@@ -75,18 +75,27 @@ namespace ikE {
 
 	//here we load the vertices via ikEnginModel
 	void FirstApp::loadGameObjects() {
-		std::shared_ptr<ikEngineModel> ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/smooth_vase.obj");
+		std::shared_ptr<ikEngineModel> ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/flat_vase.obj");
 
-        auto gameObj = IkgameObject::createGameObject();
-        gameObj.model = ikModel;
-        gameObj.transform.translation = { .0f, .0f, 2.5f };
-		gameObj.transform.scale = glm::vec3{ 3.f };
-        gameObjects.push_back(std::move(gameObj));  
+        auto flatVase= IkgameObject::createGameObject();
+        flatVase.model = ikModel;
+        flatVase.transform.translation = { -.5f, .5f, 2.5f };
+		flatVase.transform.scale = { 3.f ,1.5f,3.f};
+        gameObjects.push_back(std::move(flatVase));  
 		
 		
+	
+
+	    ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/smooth_vase.obj");
+
+		auto smoothVase = IkgameObject::createGameObject();
+		smoothVase.model = ikModel;
+		smoothVase.transform.translation = { .5f, .5f, 2.5f };
+		smoothVase.transform.scale = { 3.f ,1.5f,3.f };
+		gameObjects.push_back(std::move(smoothVase));
+
+
 	}
-
-
 
 	
 

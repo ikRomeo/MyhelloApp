@@ -155,6 +155,7 @@
     <ClCompile Include="Src\ikCamera.cpp" />
     <ClCompile Include="Src\ikDeviceEngine.cpp" />
     <ClCompile Include="Src\ikEngineModel.cpp" />
+    <ClCompile Include="Src\ikgameObject.cpp" />
     <ClCompile Include="Src\ikPipeline.cpp" />
     <ClCompile Include="Src\ikRenderer.cpp" />
     <ClCompile Include="Src\ikRenderSystem.cpp" />

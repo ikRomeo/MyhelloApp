@@ -15,7 +15,7 @@ namespace ikE {
 
 	struct SimplePushConstantData {
 		glm::mat4 transform{ 1.f };
-		glm::mat4 modelMatrix{ 1.f };
+		glm::mat4 normalMatrix{ 1.f };
 	};
 
 	//FirstApp::FirstApp() {loadGameObjects(),ikeDeviceEngine.createCommandPool(), createPipelinelayout(); }
@@ -81,7 +81,7 @@ namespace ikE {
 			SimplePushConstantData push{};
 			auto modelMatrix = obj.transform.mat4();
 			push.transform = projectionView * modelMatrix;
-			push.modelMatrix = modelMatrix;
+			push.normalMatrix = obj.transform.normalMatrix();
 
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,
