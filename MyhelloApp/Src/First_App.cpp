@@ -37,21 +37,20 @@ namespace ikE {
 
 	void FirstApp::run() {
 
-		//find lowest common multiple
-		auto minOffsetAlignment = std::lcm(
-			ikeDeviceEngine.properties.limits.minUniformBufferOffsetAlignment,
-			ikeDeviceEngine.properties.limits.nonCoherentAtomSize);
-
-		IkBuffer globalUboBuffer{
-			ikeDeviceEngine,
-			sizeof(GlobalUbo),
-			ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT, //instance count
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-		    minOffsetAlignment,
-		
+		std::vector < std::unique_ptr<IkBuffer>> uboBuffers(ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < uboBuffers.size(); i++) {
+			uboBuffers[i] = std::make_unique<IkBuffer>(
+				ikeDeviceEngine,
+				sizeof(GlobalUbo),
+				1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+			
+			);
+			uboBuffers[i]->map();
 		};
-		globalUboBuffer.map();
+
+		
 
 		IkRenderSystem ikeRenderSystem{ ikeDeviceEngine,IkRenderer.getSwapChainRenderPass() };
         IkCamera camera{};
@@ -94,8 +93,11 @@ namespace ikE {
 				//update
 				GlobalUbo ubo{};
 				ubo.projectionView = camera.getProjection() * camera.getView();
-				globalUboBuffer.writeToIndex(&ubo, frameIndex);
-				globalUboBuffer.flushIndex(frameIndex);
+				uboBuffers[frameIndex]->writeToBuffer(&ubo);
+				uboBuffers[frameIndex]->flush();
+
+
+
 
 				//render
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
