@@ -14,6 +14,7 @@ namespace ikE {
 		float frameTime;
 		VkCommandBuffer commandBuffer;
 		IkCamera& camera;
+		VkDescriptorSet globalDescriptorSet;
 	};
 
 

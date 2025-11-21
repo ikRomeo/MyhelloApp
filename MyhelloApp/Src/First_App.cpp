@@ -28,8 +28,10 @@ namespace ikE {
 
     struct GlobalUbo {
 	    glm::mat4 projectionView{ 1.f };
-	    glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f,-3.f, -1.f });
-    };
+		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };
+		glm::vec3 lightPosition{ -1.f };
+		alignas (16)glm::vec4 lightColor{ 1.f }; // w is light intensity
+    }; 
 	
 
 	FirstApp::FirstApp() { 
@@ -70,13 +72,19 @@ namespace ikE {
 				.build(globalDescriptorSets[i]);
 		}
 
-		IkRenderSystem ikeRenderSystem{ ikeDeviceEngine,IkRenderer.getSwapChainRenderPass() };
+		IkRenderSystem ikeRenderSystem{ 
+			ikeDeviceEngine,
+			IkRenderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()};
         IkCamera camera{};
 
 
         camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
 
         auto viewerObject = IkgameObject::createGameObject();
+
+		viewerObject.transform.translation.z = -2.5f;
+
         keyBoardMovementController cameraController{};
 
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -97,7 +105,7 @@ namespace ikE {
 
             float aspect = IkRenderer.getAspectRatio();
             // camera.setOrthographicProjection( -aspect, aspect , -1, 1,  -1, 1 );
-            camera.setPerspectiveProjection(glm::radians( 50.f), aspect, 0.1f, 10.f);
+            camera.setPerspectiveProjection(glm::radians( 50.f), aspect, 0.1f, 1000.f); // 1000 is for clippin or 100
 
 
 			if (auto commandBuffer = IkRenderer.beginFrame()) {
@@ -106,7 +114,8 @@ namespace ikE {
 					frameIndex,
 					frameTime,
 					commandBuffer,
-					camera
+					camera,
+					globalDescriptorSets[frameIndex]
 				};
 				//update
 				GlobalUbo ubo{};
@@ -139,7 +148,7 @@ namespace ikE {
 
         auto flatVase= IkgameObject::createGameObject();
         flatVase.model = ikModel;
-        flatVase.transform.translation = { -.5f, .5f, 2.5f };
+        flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f ,1.5f,3.f};
         gameObjects.push_back(std::move(flatVase));  
 		
@@ -150,9 +159,19 @@ namespace ikE {
 
 		auto smoothVase = IkgameObject::createGameObject();
 		smoothVase.model = ikModel;
-		smoothVase.transform.translation = { .5f, .5f, 2.5f };
+		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f ,1.5f,3.f };
 		gameObjects.push_back(std::move(smoothVase));
+
+
+
+		ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/quad.obj");
+
+		auto floor = IkgameObject::createGameObject();
+		floor.model = ikModel;
+		floor.transform.translation = { 0.f, .5f, 0.f };
+		floor.transform.scale = { 3.f ,1.f,3.f };
+		gameObjects.push_back(std::move(floor));
 
 
 	}

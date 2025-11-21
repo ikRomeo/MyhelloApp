@@ -16,7 +16,7 @@ namespace ikE {
 		
 
 		//because we have the constructors here we should also remember to delete the copy constructors 
-		IkRenderSystem(IkeDeviceEngine &device, VkRenderPass renderPass);
+		IkRenderSystem(IkeDeviceEngine &device, VkRenderPass renderPass,VkDescriptorSetLayout globalSetLayout);
 		~IkRenderSystem();
 
 		IkRenderSystem(const IkRenderSystem&) = delete;
@@ -27,7 +27,7 @@ namespace ikE {
 	private:
 		
 	
-		void createPipelinelayout();
+		void createPipelinelayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 		
 
