@@ -1,8 +1,27 @@
 #include "ikEngineModel.hpp"
+#include "ikUtils.hpp"
+//libs
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 //std
 #include <vector>
 #include <cassert>
 #include <cstring>
+#include <iostream>
+#include <unordered_map>
+
+namespace std {
+	template <>
+	struct hash<ikE::ikEngineModel::Vertex> {
+		size_t operator()(ikE::ikEngineModel::Vertex const& vertex) const {
+			size_t seed = 0;
+			ikE::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			return seed;
+		}
+	};
+}
 
 namespace ikE {
 
@@ -36,6 +55,18 @@ namespace ikE {
 			vkFreeMemory(IkeDevice.device(), indexBufferMemory, nullptr);
 		}
 	}
+
+	std::unique_ptr<ikEngineModel> ikEngineModel::createModelFromFile(IkeDeviceEngine& device, const std::string& filepath) {
+
+		Builder builder{};
+		builder.loadModel(filepath);
+
+		std::cout << "Vertex count: " << builder.vertices.size() << "\n";
+		return std::make_unique<ikEngineModel>(device, builder);
+
+	}
+
+
 
 	/*
 	 createVertexBuffers we access the struct which is in the hpp file
@@ -167,6 +198,8 @@ namespace ikE {
 	/* here we have the vector argument then ikEngineModel the class and Vertex the nested struct and getBindingDescription a member of the static member of the struct Vertex
 	   Notice that we did not use the static keyword here only in the hpp file */
 	std::vector<VkVertexInputBindingDescription>ikEngineModel::Vertex::getBindingDescriptions() {
+
+
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
 		bindingDescriptions[0].stride = sizeof(Vertex);
@@ -176,23 +209,79 @@ namespace ikE {
 	}
 	/*we now will update the attributeDescription to take 2 different parts*/
 	std::vector<VkVertexInputAttributeDescription>ikEngineModel::Vertex::getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;  // equivalent to the layout(location = 0) in vec2 position in shader.vert file
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, position);
-	
 
 
-		attributeDescriptions[1].binding = 0; // because we are both interleaving both colors to one binding it will still remain 0
-		attributeDescriptions[1].location = 1;  // equivalent to the layout(location = 1) in vec3 position in shader.vert file
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT; // because it is vec3 we add B32 to the format
-		attributeDescriptions[1].offset = offsetof(Vertex, color);  // here we use offsetof operator to calculate the vertex and color
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+
+		attributeDescriptions.push_back( {0,0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)} );
+		attributeDescriptions.push_back({ 1,0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
+		attributeDescriptions.push_back({ 2,0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
+		attributeDescriptions.push_back({ 3,0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
+
+
 		return attributeDescriptions;
 
 
 	}
 
+	void ikEngineModel::Builder::loadModel(const std::string& filepath) {
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, err;
+
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
+			throw std::runtime_error(warn + err);
+		}
+
+		vertices.clear();
+		indices.clear();
+
+		std::unordered_map<Vertex ,uint32_t> uniqueVertices{};
+
+		for (const auto& shape : shapes) {
+			for (const auto& index : shape.mesh.indices) {
+				Vertex vertex{};
+
+				if (index.vertex_index >= 0) {
+					vertex.position = {
+						attrib.vertices[3 * index.vertex_index + 0],
+						attrib.vertices[3 * index.vertex_index + 1],
+						attrib.vertices[3 * index.vertex_index + 2],
+					};
+
+					vertex.color = {
+						attrib.colors[3 * index.vertex_index + 0],
+						attrib.colors[3 * index.vertex_index + 1],
+						attrib.colors[3 * index.vertex_index + 2],
+					};
+
+				}
+
+				if (index.normal_index >= 0) {
+					vertex.normal = {
+						attrib.normals[3 * index.normal_index + 0],
+						attrib.normals[3 * index.normal_index + 1],
+						attrib.normals[3 * index.normal_index + 2],
+					};
+				}
+				if (index.texcoord_index >= 0) {
+					vertex.uv = {
+						attrib.texcoords[2 * index.texcoord_index + 0],
+						attrib.texcoords[2 * index.texcoord_index + 1],
+						
+					};
+				}
+				//vertices.push_back(vertex);
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+					vertices.push_back(vertex);
+				}
+
+				indices.push_back(uniqueVertices[vertex]);
+			}
+		}
+	}
 
 
 }//namespace

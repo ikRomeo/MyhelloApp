@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\ExternalLibraries\vulkan\Include;$(ProjectDir)\ExternalLibraries\GLFW\include;$(ProjectDir)\ExternalLibraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\ExternalLibraries\vulkan\Include;$(ProjectDir)\ExternalLibraries\GLFW\include;$(ProjectDir)\ExternalLibraries\glm;$(ProjectDir)\ExternalLibraries\tinyObjLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -151,35 +151,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="First_App.cpp" />
-    <ClCompile Include="ikCamera.cpp" />
-    <ClCompile Include="ikDeviceEngine.cpp" />
-    <ClCompile Include="ikEngineModel.cpp" />
-    <ClCompile Include="ikPipeline.cpp" />
-    <ClCompile Include="ikRenderer.cpp" />
-    <ClCompile Include="ikRenderSystem.cpp" />
-    <ClCompile Include="ikSwapChain.cpp" />
-    <ClCompile Include="ikWindow.cpp" />
-    <ClCompile Include="KeyBoardMovementController.cpp" />
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Src\First_App.cpp" />
+    <ClCompile Include="Src\ikCamera.cpp" />
+    <ClCompile Include="Src\ikDeviceEngine.cpp" />
+    <ClCompile Include="Src\ikEngineModel.cpp" />
+    <ClCompile Include="Src\ikPipeline.cpp" />
+    <ClCompile Include="Src\ikRenderer.cpp" />
+    <ClCompile Include="Src\ikRenderSystem.cpp" />
+    <ClCompile Include="Src\ikSwapChain.cpp" />
+    <ClCompile Include="Src\ikWindow.cpp" />
+    <ClCompile Include="Src\KeyBoardMovementController.cpp" />
+    <ClCompile Include="Src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="compile.bat" />
-    <None Include="shader.frag" />
-    <None Include="shader.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="First_App.hpp" />
-    <ClInclude Include="ikCamera.hpp" />
-    <ClInclude Include="ikDeviceEngine.hpp" />
-    <ClInclude Include="ikEngineModel.hpp" />
-    <ClInclude Include="ikgameObject.hpp" />
-    <ClInclude Include="ikPipeline.hpp" />
-    <ClInclude Include="ikRenderer.hpp" />
-    <ClInclude Include="ikRenderSystem.hpp" />
-    <ClInclude Include="ikSwapChain.hpp" />
-    <ClInclude Include="ikWindow.hpp" />
-    <ClInclude Include="KeyBoardMovementController.hpp" />
+    <ClInclude Include="Src\First_App.hpp" />
+    <ClInclude Include="Src\ikCamera.hpp" />
+    <ClInclude Include="Src\ikDeviceEngine.hpp" />
+    <ClInclude Include="Src\ikEngineModel.hpp" />
+    <ClInclude Include="Src\ikgameObject.hpp" />
+    <ClInclude Include="Src\ikPipeline.hpp" />
+    <ClInclude Include="Src\ikRenderer.hpp" />
+    <ClInclude Include="Src\ikRenderSystem.hpp" />
+    <ClInclude Include="Src\ikSwapChain.hpp" />
+    <ClInclude Include="Src\ikUtils.hpp" />
+    <ClInclude Include="Src\ikWindow.hpp" />
+    <ClInclude Include="Src\KeyBoardMovementController.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

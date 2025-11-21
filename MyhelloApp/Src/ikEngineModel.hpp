@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 
 //std
+#include<memory>
 #include <vector>
 
 
@@ -22,32 +23,27 @@ namespace ikE {
 	class ikEngineModel {
 
 	public:
-		/*the Vertex struct represents a single vertex. Currently, it only has a glm::vec2 position
-		  meaning this is a 2D vertex
-		  The two static functions describe how Vulkan should interprete this struct when it reads it
-		   in the vertex shader 
-		   VkVertexInputBindingDescription tells Vulkan how to read the vertex buffer memory.
-		   Essentially, it defines the stride(which is size of each vertex), which buffer you are using
-		   and the rate at which to step through vertices
-		   VkVertexInputAttributeDescription tells Vulkan how to interprete each piece of data inside a vertex
-		   (position,color,normal,uv, e.t.c) and maps it to a shader input location.
-		   In simple terms it tells Vulkan how big each vertex is and how to move between them in the vertex buffer
-
-		   and they a both used in the VkPipelineVertexInputStateCreateInfo struct which is in the ikPipelince.cpp file
-		   you will Notice that they are both stored in dynamic array std::vector
-		   
-		   */
+		
 		struct Vertex {
 			glm::vec3 position;
-			glm::vec3 color;  //new
+			glm::vec3 color;  
+
+			glm::vec3 normal{};
+			glm::vec2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
+
+			bool operator==(const Vertex& other) const {
+				return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
+			}
 		};
 
 		struct Builder {
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
+
+			void loadModel(const std::string& filepath);
 
 		};
 
@@ -61,6 +57,8 @@ namespace ikE {
 
 		ikEngineModel(const ikEngineModel&) = delete;
 		ikEngineModel& operator = (const ikEngineModel&) = delete;
+
+		static std::unique_ptr<ikEngineModel> createModelFromFile(IkeDeviceEngine& device, const std::string& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

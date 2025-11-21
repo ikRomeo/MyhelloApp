@@ -76,11 +76,6 @@ namespace ikE {
         auto vertCode = readFile(vertFilepath);
         auto fragCode = readFile(fragFilepath);
 
-        //std::cout << "Vertex Shader Code size:" << vertCode.size() << "\n";
-        //std::cout << "Fragment Shader Code size:" << fragCode.size() << "\n";
-
-
-        //this need explanation
         createShaderModule(vertCode, &vertShaderModule);
         createShaderModule(fragCode, &fragShaderModule);
         // ShaderStage

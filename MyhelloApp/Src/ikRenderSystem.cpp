@@ -15,7 +15,7 @@ namespace ikE {
 
 	struct SimplePushConstantData {
 		glm::mat4 transform{ 1.f };
-		alignas(16) glm::vec3 color;
+		glm::mat4 modelMatrix{ 1.f };
 	};
 
 	//FirstApp::FirstApp() {loadGameObjects(),ikeDeviceEngine.createCommandPool(), createPipelinelayout(); }
@@ -67,7 +67,7 @@ namespace ikE {
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		//Pipeline = std::make_unique<ikePipeline>(ikeDeviceEngine, "frag.spv", "vert.spv", pipelineConfig);
 
-		Pipeline = std::make_unique<ikePipeline>(ikeDeviceEngine, "vert.spv", "frag.spv", pipelineConfig);
+		Pipeline = std::make_unique<ikePipeline>(ikeDeviceEngine, "Shaders/vert.spv", "Shaders/frag.spv", pipelineConfig);
 	}
 
 	//needs explanation
@@ -79,8 +79,9 @@ namespace ikE {
 
 		for (auto& obj : gameObjects) {
 			SimplePushConstantData push{};
-			push.color = obj.color;
-			push.transform = projectionView * obj.transform.mat4();
+			auto modelMatrix = obj.transform.mat4();
+			push.transform = projectionView * modelMatrix;
+			push.modelMatrix = modelMatrix;
 
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,
