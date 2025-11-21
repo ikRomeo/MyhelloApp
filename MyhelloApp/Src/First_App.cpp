@@ -17,6 +17,7 @@
 #include <chrono>
 #include <stdexcept>
 #include <cassert>
+#include <numeric>
 
 
 
@@ -36,13 +37,18 @@ namespace ikE {
 
 	void FirstApp::run() {
 
+		//find lowest common multiple
+		auto minOffsetAlignment = std::lcm(
+			ikeDeviceEngine.properties.limits.minUniformBufferOffsetAlignment,
+			ikeDeviceEngine.properties.limits.nonCoherentAtomSize);
+
 		IkBuffer globalUboBuffer{
 			ikeDeviceEngine,
 			sizeof(GlobalUbo),
 			ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT, //instance count
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-			ikeDeviceEngine.properties.limits.minUniformBufferOffsetAlignment,
+		    minOffsetAlignment,
 		
 		};
 		globalUboBuffer.map();
@@ -91,6 +97,7 @@ namespace ikE {
 				globalUboBuffer.writeToIndex(&ubo, frameIndex);
 				globalUboBuffer.flushIndex(frameIndex);
 
+				//render
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
 				ikeRenderSystem.renderGameObjects(frameInfo,gameObjects);
 				IkRenderer.endSwapChainRenderPass(commandBuffer);
