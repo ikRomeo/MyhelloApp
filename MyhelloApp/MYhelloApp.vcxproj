@@ -171,6 +171,7 @@
     <ClInclude Include="Src\ikCamera.hpp" />
     <ClInclude Include="Src\ikDeviceEngine.hpp" />
     <ClInclude Include="Src\ikEngineModel.hpp" />
+    <ClInclude Include="Src\ikframeInfo.hpp" />
     <ClInclude Include="Src\ikgameObject.hpp" />
     <ClInclude Include="Src\ikPipeline.hpp" />
     <ClInclude Include="Src\ikRenderer.hpp" />

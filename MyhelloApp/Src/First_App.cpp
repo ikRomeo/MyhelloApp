@@ -1,5 +1,6 @@
 #include "First_App.hpp"
 #include "KeyBoardMovementController.hpp"
+#include "ikBuffer.hpp"
 #include "ikCamera.hpp"
 #include "ikRenderSystem.hpp"
 //libs
@@ -17,17 +18,39 @@
 #include <stdexcept>
 #include <cassert>
 
+
+
+
+
+
 namespace ikE {
 
+    struct GlobalUbo {
+	    glm::mat4 projectionView{ 1.f };
+	    glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f,-3.f, -1.f });
+    };
 	
 
 	FirstApp::FirstApp() { loadGameObjects(); }
 	FirstApp::~FirstApp() { }
 
 	void FirstApp::run() {
+
+		IkBuffer globalUboBuffer{
+			ikeDeviceEngine,
+			sizeof(GlobalUbo),
+			ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT, //instance count
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			ikeDeviceEngine.properties.limits.minUniformBufferOffsetAlignment,
+		
+		};
+		globalUboBuffer.map();
+
 		IkRenderSystem ikeRenderSystem{ ikeDeviceEngine,IkRenderer.getSwapChainRenderPass() };
         IkCamera camera{};
-        //camera.setViewDirection(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 1.f));
+
+
         camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
 
         auto viewerObject = IkgameObject::createGameObject();
@@ -55,11 +78,21 @@ namespace ikE {
 
 
 			if (auto commandBuffer = IkRenderer.beginFrame()) {
-				// begin offscreen shadow pass
-				// render shadow casting objects
-				// end offscreen shadow pass
+				int frameIndex = IkRenderer.getFrameIndex();
+				FrameInfo frameInfo{
+					frameIndex,
+					frameTime,
+					commandBuffer,
+					camera
+				};
+				//update
+				GlobalUbo ubo{};
+				ubo.projectionView = camera.getProjection() * camera.getView();
+				globalUboBuffer.writeToIndex(&ubo, frameIndex);
+				globalUboBuffer.flushIndex(frameIndex);
+
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
-				ikeRenderSystem.renderGameObjects(commandBuffer,gameObjects,camera);
+				ikeRenderSystem.renderGameObjects(frameInfo,gameObjects);
 				IkRenderer.endSwapChainRenderPass(commandBuffer);
 				IkRenderer.endFrame();
 			}

@@ -5,6 +5,7 @@
 #include "ikDeviceEngine.hpp"
 #include "ikgameObject.hpp"
 #include "ikPipeline.hpp"
+#include "ikframeInfo.hpp"
 
 //std
 #include <memory>
@@ -21,7 +22,7 @@ namespace ikE {
 		IkRenderSystem(const IkRenderSystem&) = delete;
 		IkRenderSystem& operator =(const IkRenderSystem&) = delete;
 
-        void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<IkgameObject> &gameObjects, const IkCamera &camera);
+        void renderGameObjects(FrameInfo &frameInfo, std::vector<IkgameObject> &gameObjects);
 
 	private:
 		
