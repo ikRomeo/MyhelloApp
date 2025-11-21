@@ -46,15 +46,7 @@ namespace ikE {
 	   we call vkDestroyBuffer with 3 arguments (IkeDevice which is the initilizer .device() function and vertexBuffer of type VkBuffer and nullptr) this frees vkhandle
 	   we call vkFreeMemory  with 3 arguments (the vertexBufferMemory of type VkDeviceMemory and nullptr) this frees the memory that was allocated for the buffer
 	   */
-	ikEngineModel::~ikEngineModel() {
-		vkDestroyBuffer(IkeDevice.device(), vertexBuffer, nullptr);
-		vkFreeMemory(IkeDevice.device(), vertexBufferMemory, nullptr);
-
-		if (hasIndexBuffer) {
-			vkDestroyBuffer(IkeDevice.device(), indexBuffer, nullptr);
-			vkFreeMemory(IkeDevice.device(), indexBufferMemory, nullptr);
-		}
-	}
+	ikEngineModel::~ikEngineModel() {}
 
 	std::unique_ptr<ikEngineModel> ikEngineModel::createModelFromFile(IkeDeviceEngine& device, const std::string& filepath) {
 
@@ -93,26 +85,30 @@ namespace ikE {
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3!");
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
+		uint32_t vertexSize = sizeof(vertices[0]);
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
+		IkBuffer stagingBuffer{
+			IkeDevice,vertexSize,vertexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		};
 
-		IkeDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)vertices.data());
 		
-		void* data;
-		vkMapMemory(IkeDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(IkeDevice.device(), stagingBufferMemory);
+		vertexBuffer = std::make_unique<IkBuffer>(
+			IkeDevice,
+			vertexSize,
+			vertexCount,
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		);
 
-		IkeDevice.createBuffer(bufferSize, 
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, 
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+	
 
-		IkeDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+		IkeDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 
-		vkDestroyBuffer(IkeDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(IkeDevice.device(), stagingBufferMemory, nullptr);
+	
 
 	}
 
@@ -125,33 +121,28 @@ namespace ikE {
 		}
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+		uint32_t indexSize = sizeof((indices[0]));
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		IkeDevice.createBuffer(
-			bufferSize, 
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+		IkBuffer stagingBuffer{
+			IkeDevice,
+			indexSize,
+			indexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer, stagingBufferMemory);
+		
+		};
 
-
-		void* data;
-		vkMapMemory(IkeDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(IkeDevice.device(), stagingBufferMemory);
-
-		IkeDevice.createBuffer(
-			bufferSize,
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)indices.data());
+		indexBuffer = std::make_unique<IkBuffer>(
+			IkeDevice,
+			indexSize,
+			indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
-		IkeDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-		vkDestroyBuffer(IkeDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(IkeDevice.device(), stagingBufferMemory, nullptr);
-
-
-	
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		
+		);
+		IkeDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	
 	}
 
@@ -160,14 +151,6 @@ namespace ikE {
 
 
 
-	/* with the draw() we then issue a draw command inside the commandBuffer which is of type VkCommandBuffer 
-	   inside it's function we call vkCmdDraw that take 5 arguments
-	   (the commandBuffer, 
-	    vertexCount which is the number of vertices to draw, 
-	    1 meaning instanceCount(for instancing -1 means a single draw,
-	    0 means the firstVertex(start at vertex index 0,
-	    0 means the firstInstance(state at instance index 0))
-	*/
 	void ikEngineModel::draw(VkCommandBuffer commandBuffer) {
 		if (hasIndexBuffer) {
 			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
@@ -185,13 +168,13 @@ namespace ikE {
 	   then we call vkCmdBindingVertexBuffers() with 5 arguments
 	   */
 	void ikEngineModel::bind(VkCommandBuffer commandBuffer) {
-		VkBuffer buffers[] = { vertexBuffer };
+		VkBuffer buffers[] = { vertexBuffer->getBuffer()};
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 	
 
 	if (hasIndexBuffer) {
-		vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 	   }
 	}
 

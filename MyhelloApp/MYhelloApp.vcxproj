@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\First_App.cpp" />
+    <ClCompile Include="Src\ikbuffer.cpp" />
     <ClCompile Include="Src\ikCamera.cpp" />
     <ClCompile Include="Src\ikDeviceEngine.cpp" />
     <ClCompile Include="Src\ikEngineModel.cpp" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\First_App.hpp" />
+    <ClInclude Include="Src\ikbuffer.hpp" />
     <ClInclude Include="Src\ikCamera.hpp" />
     <ClInclude Include="Src\ikDeviceEngine.hpp" />
     <ClInclude Include="Src\ikEngineModel.hpp" />

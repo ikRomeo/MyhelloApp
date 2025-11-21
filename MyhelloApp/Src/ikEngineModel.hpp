@@ -4,7 +4,7 @@
 
 
 #include "ikDeviceEngine.hpp"
-
+#include "ikbuffer.hpp"
 //libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -71,13 +71,11 @@ namespace ikE {
 
 		IkeDeviceEngine &IkeDevice;
 		
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
+		std::unique_ptr<IkBuffer> vertexBuffer;
 		uint32_t vertexCount;
 
 		bool hasIndexBuffer = false;
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		std::unique_ptr<IkBuffer> indexBuffer;
 		uint32_t indexCount;
 
 	};
