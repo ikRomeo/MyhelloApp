@@ -3,6 +3,7 @@
 #define IKFRAMEINFO_HPP
 
 #include "ikCamera.hpp"
+#include "ikgameObject.hpp"
 
 //lib
 #include <vulkan/vulkan.h>
@@ -15,6 +16,7 @@ namespace ikE {
 		VkCommandBuffer commandBuffer;
 		IkCamera& camera;
 		VkDescriptorSet globalDescriptorSet;
+		IkgameObject::Map& gameObjects;
 	};
 
 

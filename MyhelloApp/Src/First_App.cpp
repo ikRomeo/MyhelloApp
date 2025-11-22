@@ -61,7 +61,7 @@ namespace ikE {
 
 
 		auto globalSetLayout = IkDescriptorSetLayout::Builder(ikeDeviceEngine)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(ikEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -115,7 +115,8 @@ namespace ikE {
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					gameObjects
 				};
 				//update
 				GlobalUbo ubo{};
@@ -128,7 +129,7 @@ namespace ikE {
 
 				//render
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
-				ikeRenderSystem.renderGameObjects(frameInfo,gameObjects);
+				ikeRenderSystem.renderGameObjects(frameInfo);
 				IkRenderer.endSwapChainRenderPass(commandBuffer);
 				IkRenderer.endFrame();
 			}
@@ -150,7 +151,7 @@ namespace ikE {
         flatVase.model = ikModel;
         flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f ,1.5f,3.f};
-        gameObjects.push_back(std::move(flatVase));  
+        gameObjects.emplace(flatVase.getId(),std::move(flatVase));  
 		
 		
 	
@@ -161,7 +162,7 @@ namespace ikE {
 		smoothVase.model = ikModel;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f ,1.5f,3.f };
-		gameObjects.push_back(std::move(smoothVase));
+		gameObjects.emplace(smoothVase.getId(),std::move(smoothVase));
 
 
 
@@ -171,7 +172,7 @@ namespace ikE {
 		floor.model = ikModel;
 		floor.transform.translation = { 0.f, .5f, 0.f };
 		floor.transform.scale = { 3.f ,1.f,3.f };
-		gameObjects.push_back(std::move(floor));
+		gameObjects.emplace(floor.getId(),std::move(floor));
 
 
 	}

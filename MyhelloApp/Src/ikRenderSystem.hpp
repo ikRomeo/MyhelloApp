@@ -22,7 +22,7 @@ namespace ikE {
 		IkRenderSystem(const IkRenderSystem&) = delete;
 		IkRenderSystem& operator =(const IkRenderSystem&) = delete;
 
-        void renderGameObjects(FrameInfo &frameInfo, std::vector<IkgameObject> &gameObjects);
+        void renderGameObjects(FrameInfo &frameInfo);
 
 	private:
 		

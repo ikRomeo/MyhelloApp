@@ -40,7 +40,7 @@ namespace ikE {
 		//it is initialized from top to bottom
 		//and cleaned up in reverse order meaning bottom to top
 		std::unique_ptr<IkDescriptorPool> globalPool{};
-		std::vector<IkgameObject> gameObjects;
+		IkgameObject::Map gameObjects;
 	};
 
 } //namepace

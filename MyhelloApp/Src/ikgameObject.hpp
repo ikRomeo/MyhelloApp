@@ -7,6 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 //std
 #include <memory>
+#include <unordered_map>
 
 namespace ikE{
 	//this is used to move objects up and down
@@ -25,6 +26,7 @@ namespace ikE{
 	class IkgameObject {
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, IkgameObject>;
 
 		static IkgameObject createGameObject() {
 			static id_t currentId = 0;
