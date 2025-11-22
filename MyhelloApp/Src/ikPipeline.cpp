@@ -78,30 +78,7 @@ namespace ikE {
 
         createShaderModule(vertCode, &vertShaderModule);
         createShaderModule(fragCode, &fragShaderModule);
-        // ShaderStage
-        //we instance VkPipelineShaderStageCreateInfo struct with an array of
-        // two components via shaderStages which is the vert and the frag shader
-        // both components with number 0 and 1 uses the same struct which is
-        // the VkPipelineShaderStageCreateInfo that tells vulkan which shader
-        // module to use
-        // .sType alway set this to identify what structure type it is for
-        //   vulkan to use before anything
-        // .stage specifies the stage be it Vk_Shader_Stage_vertex_bit and
-        // .module which is vertShaderModule is a compile SPIR-v shader module
-        //   for vertex shader and fragment shader via createShaderModule()
-        // .pName is the Entry function name in GLSL shader which is usually "main"
-        // .flags = 0 it is reserved for fututue use and it is an enum
-        //  that represents different shader stages or group of stages in vulkan
-        //  it is used in vulkan structs to specify which shader stages to apply
-        //  certain settings and create pipeline shader stages
-        // .pNext No extension struture chained so it is set to nullptr by default
-        // .pSpecialization because we don't want to customize the shader behavior
-        //  for now by telling the compiler to generate specialized code paths
-        //  we will simply assign nullptr to pSpecialization which is a pointer 
-        //  variable and instance to VkSpecialization
-        //  we will also do the same to the vert by adding the seven members
-        //  we just described the only difference will be in the .sType,.stage.module
-        //  where we use the respective fragShaderModule
+        
         VkPipelineShaderStageCreateInfo shaderStages[2];
         shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -120,31 +97,10 @@ namespace ikE {
         shaderStages[1].pSpecializationInfo = nullptr;
 
         //we tell our pipeline to use the ikEngineModel here
-        auto bindingDescriptions = ikEngineModel::Vertex::getBindingDescriptions();
-        auto attributeDescriptions = ikEngineModel::Vertex::getAttributeDescriptions();
+        auto &bindingDescriptions = configInfo.bindingDescriptions;
+        auto &attributeDescriptions = configInfo.attributeDescriptions;
 
-        //this tells us how we interprete the vertex buffer
-        // meaning how data should be read from vertex buffer and
-        // interpreted by the GPU inside the graphics pipeline
-        // and it is a fixed function
-        // we first declare and zero initialized the structure
-        // .sType Specifies the type of structure we are using
-        // .vertexAttributeDescriptionCount = 0 is a uint32_t data type that will be changed after we create the ikEngineModel to attributeDescriptions()
-        // .VertexBindingDescriptionCount = 0 is a uint32_data type that will also be change after we create the ikEngineModel to bindingDescriptons()
-        // .pvertexAttributeDescriptions = nullptr means no per-vertex that will also be changed after we create the ikEngineModel to attributeDescriptions.data()
-        //  attributes are being passed because AttributeDescription
-        //  and AttributeCounts are us to tell vulkan how to interprete
-        //  vertex buffer in memory because it describes each vertex attributes
-        //  e.g position,normal,color,texcoord it maps parts of vertex buffer
-        //  into shaders input variable i.e layout(location = 0)
-        // .pVertexBindingDescriptions = nullptr  because we have
-        //  not yet created vkCmdBindVertexBuffers which needs to use
-        //  this to vulkan which binding slots it refers to , how much to 
-        //  advance in memory for each vertex , whether to step per vertex
-        //  or per instance so we make nullptr for now Note that
-        //  this and AttributeDescriptions with AtrributewCount and BindingDescriptwork together
-        //  Notice the use of static_cast which converts a type to another i.e int to float or vice versa
-        //  and it cannot cast pointer to another pointer that we do with reinterprete cast
+       
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -156,40 +112,7 @@ namespace ikE {
      
 
 
-        //VkGraphicsPipelineCreateInfo contains all the fixed functions and programmable stage
-        // configurations for a vulkan graphics pipeline because vulkan pipelines are immutable
-        // we describe everything at once
-        // .sType is the field that tells vulkan what type of struct we are creating and want to use
-        // .stageCount = 2 because we are using two shader stage vert and frag shader
-        // .pStages is assigned the instance of VkPipelineShaderCreateInfo shaderStages
-        //  which is responsible for shader type, compile SPIR-V module and entry point which is main
-        //  the pStages and stageCount are both shader stages
-        // the fixed non programmable stage now begin with
-        // .pVertexInputState controls how vertex data is read from the buffers which is
-        //  (binding, attributes, strides, formats)
-        // .pInputAssemblyState Controls how vertices are assembled into primitives
-        //  i.e VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
-        // .pViewportState Defines viewports and scissor rectangle how NDC cordinates 
-        //  are mapped to framebuffer space
-        // .RasterizationState converts primitives into fragments
-        //  Settings include polygon mode (fill, wireframe), culling, front face winding
-        // .pMultisampleState is for Anti-aliasing control(sample count, sample shading)
-        // .Controls how fragment shader output colors are blended with existing framebuffer
-        //  colors
-        // .pDepthStencilState controls depth testing, depth writes, stencil operations
-        // .DynamicState if set allows certain state i.e (viewport,scissors, e.t.c)
-        //  to be changed without recreating the pipeline the nullptr means no dynamic state
-        // .layout defines descriptor sets and push constants basically how shaders recieve
-        //  data from CPU/GPU memory
-        // .renderPass defines framebuffer attachments i.e (color,depth,e.t.c)
-        // .subpass index tells vulkan which subpass this pipeline will be used in
-        //  The derivative pipelines are basePipelineIndex and basePipelineHandle
-        //  is a way to allow pipelines that share much of their configuration with
-        //  another pipeline for faster creation here it is unused
-        // then we call vkCreateGraphicsPipelines with (the device,because no pipeline
-        // cache is used we make it VK_NULL_HANDLE, 1 because we are creating exactly one pipeline,
-        // our configuration struct which is &pipelineInfo, we are not using any memory allocation so it is nullptr,
-        // then the output handle for the created pipeline which we reference with &graphicsPipeline)
+     
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
@@ -342,7 +265,8 @@ namespace ikE {
         configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
         configInfo.dynamicStateInfo.flags = 0;
 
-
+        configInfo.bindingDescriptions = ikEngineModel::Vertex::getBindingDescriptions();
+        configInfo.attributeDescriptions = ikEngineModel::Vertex::getAttributeDescriptions();
 
 
 

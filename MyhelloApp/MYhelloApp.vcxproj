@@ -160,11 +160,12 @@
     <ClCompile Include="Src\ikgameObject.cpp" />
     <ClCompile Include="Src\ikPipeline.cpp" />
     <ClCompile Include="Src\ikRenderer.cpp" />
-    <ClCompile Include="Src\ikRenderSystem.cpp" />
     <ClCompile Include="Src\ikSwapChain.cpp" />
     <ClCompile Include="Src\ikWindow.cpp" />
     <ClCompile Include="Src\KeyBoardMovementController.cpp" />
     <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\systems\ikPointLightSystem.cpp" />
+    <ClCompile Include="Src\systems\ikRenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\First_App.hpp" />
@@ -177,11 +178,12 @@
     <ClInclude Include="Src\ikgameObject.hpp" />
     <ClInclude Include="Src\ikPipeline.hpp" />
     <ClInclude Include="Src\ikRenderer.hpp" />
-    <ClInclude Include="Src\ikRenderSystem.hpp" />
     <ClInclude Include="Src\ikSwapChain.hpp" />
     <ClInclude Include="Src\ikUtils.hpp" />
     <ClInclude Include="Src\ikWindow.hpp" />
     <ClInclude Include="Src\KeyBoardMovementController.hpp" />
+    <ClInclude Include="Src\systems\ikPointLightSystem.hpp" />
+    <ClInclude Include="Src\systems\ikRenderSystem.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,11 +1,11 @@
 #ifndef IKRENDERSYSTEM_HPP
 #define IKRENDERSYSTEM_HPP
 
-#include "ikCamera.hpp"
-#include "ikDeviceEngine.hpp"
-#include "ikgameObject.hpp"
-#include "ikPipeline.hpp"
-#include "ikframeInfo.hpp"
+#include "../ikCamera.hpp"
+#include "../ikDeviceEngine.hpp"
+#include "../ikgameObject.hpp"
+#include "../ikPipeline.hpp"
+#include "../ikframeInfo.hpp"
 
 //std
 #include <memory>

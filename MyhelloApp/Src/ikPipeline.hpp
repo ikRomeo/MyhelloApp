@@ -50,6 +50,9 @@ namespace ikE {
         PipelineConfigInfo(const PipelineConfigInfo&) = delete;
         PipelineConfigInfo& operator = (const PipelineConfigInfo&) = delete;
        //new
+
+        std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
         VkPipelineViewportStateCreateInfo viewportInfo;
         //
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;

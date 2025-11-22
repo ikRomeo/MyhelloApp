@@ -2,7 +2,9 @@
 #include "KeyBoardMovementController.hpp"
 #include "ikBuffer.hpp"
 #include "ikCamera.hpp"
-#include "ikRenderSystem.hpp"
+#include "systems/ikRenderSystem.hpp"
+#include "systems/ikPointLightSystem.hpp"
+
 //libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -27,7 +29,8 @@
 namespace ikE {
 
     struct GlobalUbo {
-	    glm::mat4 projectionView{ 1.f };
+	    glm::mat4 projection{ 1.f };
+		glm::mat4 view{ 1.f };
 		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };
 		glm::vec3 lightPosition{ -1.f };
 		alignas (16)glm::vec4 lightColor{ 1.f }; // w is light intensity
@@ -76,6 +79,12 @@ namespace ikE {
 			ikeDeviceEngine,
 			IkRenderer.getSwapChainRenderPass(),
 			globalSetLayout->getDescriptorSetLayout()};
+
+		IkPointLightSystem pointlightSystem{
+			ikeDeviceEngine,
+			IkRenderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout() };
+
         IkCamera camera{};
 
 
@@ -120,7 +129,8 @@ namespace ikE {
 				};
 				//update
 				GlobalUbo ubo{};
-				ubo.projectionView = camera.getProjection() * camera.getView();
+				ubo.projection = camera.getProjection();
+				ubo.view = camera.getView();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
@@ -130,6 +140,7 @@ namespace ikE {
 				//render
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
 				ikeRenderSystem.renderGameObjects(frameInfo);
+				pointlightSystem.render(frameInfo);
 				IkRenderer.endSwapChainRenderPass(commandBuffer);
 				IkRenderer.endFrame();
 			}
