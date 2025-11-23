@@ -11,8 +11,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-
-
 //std
 
 #include <array>
@@ -21,21 +19,8 @@
 #include <cassert>
 #include <numeric>
 
-
-
-
-
-
 namespace ikE {
 
-    struct GlobalUbo {
-	    glm::mat4 projection{ 1.f };
-		glm::mat4 view{ 1.f };
-		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };
-		glm::vec3 lightPosition{ -1.f };
-		alignas (16)glm::vec4 lightColor{ 1.f }; // w is light intensity
-    }; 
-	
 
 	FirstApp::FirstApp() { 
 		globalPool =
@@ -131,11 +116,9 @@ namespace ikE {
 				GlobalUbo ubo{};
 				ubo.projection = camera.getProjection();
 				ubo.view = camera.getView();
+				pointlightSystem.update(frameInfo, ubo);
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
-
-
-
 
 				//render
 				IkRenderer.beginSwapChainRenderPass(commandBuffer);
@@ -148,12 +131,6 @@ namespace ikE {
 		vkDeviceWaitIdle(ikeDeviceEngine.device());
 	}
 
-
-
-
- 
-
-
 	//here we load the vertices via ikEnginModel
 	void FirstApp::loadGameObjects() {
 		std::shared_ptr<ikEngineModel> ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/flat_vase.obj");
@@ -164,8 +141,6 @@ namespace ikE {
 		flatVase.transform.scale = { 3.f ,1.5f,3.f};
         gameObjects.emplace(flatVase.getId(),std::move(flatVase));  
 		
-		
-	
 
 	    ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/smooth_vase.obj");
 
@@ -175,8 +150,6 @@ namespace ikE {
 		smoothVase.transform.scale = { 3.f ,1.5f,3.f };
 		gameObjects.emplace(smoothVase.getId(),std::move(smoothVase));
 
-
-
 		ikModel = ikEngineModel::createModelFromFile(ikeDeviceEngine, "Assets/models/quad.obj");
 
 		auto floor = IkgameObject::createGameObject();
@@ -185,6 +158,11 @@ namespace ikE {
 		floor.transform.scale = { 3.f ,1.f,3.f };
 		gameObjects.emplace(floor.getId(),std::move(floor));
 
+
+		{
+			auto pointLight = IkgameObject::makePointLight(0.2f);
+			gameObjects.emplace(pointLight.getId(), std::move(pointLight));
+		}
 
 	}
 

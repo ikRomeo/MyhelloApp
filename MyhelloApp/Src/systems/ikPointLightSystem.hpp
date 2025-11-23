@@ -22,6 +22,7 @@ namespace ikE {
 		IkPointLightSystem(const IkPointLightSystem&) = delete;
 		IkPointLightSystem& operator =(const IkPointLightSystem&) = delete;
 
+		void update(FrameInfo& frameInfo, GlobalUbo& ubo);
         void render(FrameInfo &frameInfo);
 
 	private:
